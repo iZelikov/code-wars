@@ -3,7 +3,7 @@
 #
 # We will consider a, e, i, o, u as vowels for this Kata (but not y).
 #
-# The input string will only consist of lower case letters and/or spaces.
+# The day_1_input.txt string will only consist of lower case letters and/or spaces.
 
 def get_count(sentence):
     vovels="aeiou"

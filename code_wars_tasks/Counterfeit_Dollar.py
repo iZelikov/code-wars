@@ -20,7 +20,7 @@
 # If it's impossible to determine, return "???".
 #
 # Input/Output
-# [input] string array results
+# [day_1_input.txt] string array results
 # A string array contains the results of Sally's weighing.
 #
 # [output] a string

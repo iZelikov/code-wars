@@ -21,7 +21,7 @@
 #  1 1 1 3 1   1100: 1000 (for three 1s) + 100 (for the other 1)
 #  2 4 4 5 4   450:  400 (for three 4s) + 50 (for the 5)
 #
-# Note: your solution must not modify the input list.
+# Note: your solution must not modify the day_1_input.txt list.
 
 rules = [
     {"value": 1, "count": 3, "points": 1000},

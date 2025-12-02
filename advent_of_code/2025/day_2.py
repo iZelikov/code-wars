@@ -92,7 +92,6 @@ def second_stage(ids):
     for id1, id2 in get_ids(ids):
         for i in range(int(id1), int(id2) + 1):
             if is_invalid_id2(i):
-                # print(i)
                 total += i
     print(total)
 
@@ -101,8 +100,4 @@ with open("day_2_input.txt") as f:
     first_stage(ids)
     second_stage(ids)
 
-
-
-# ids = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124"
-# second_stage(ids)
 

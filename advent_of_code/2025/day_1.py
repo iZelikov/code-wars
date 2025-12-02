@@ -104,7 +104,7 @@ def get_number2(move: str, current_number: int = 50, total_numbers=100) -> tuple
         clicks = number // total_numbers
         return current_number, clicks
     else:
-        number = (total_numbers - (current_number or total_numbers)) + int(move[1:])
+        number = total_numbers - (current_number or total_numbers) + int(move[1:])
         current_number = (100 - number) % total_numbers
         clicks = number // total_numbers
         return  current_number, clicks

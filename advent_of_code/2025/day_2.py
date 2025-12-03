@@ -95,7 +95,7 @@ def second_stage(ids):
                 total += i
     print(total)
 
-with open("day_2_input.txt") as f:
+with open("day_2.txt") as f:
     ids = f.read()
     first_stage(ids)
     second_stage(ids)

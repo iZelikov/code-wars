@@ -17,7 +17,7 @@ You arrive at the secret entrance to the North Pole base ready to start decorati
 
 The safe has a dial with only an arrow on it; around the dial are the numbers 0 through 99 in order. As you turn the dial, it makes a small click noise as it reaches each number.
 
-The attached document (your puzzle day_1_input.txt) contains a sequence of rotations, one per line, which tell you how to open the safe. A rotation starts with an L or R which indicates whether the rotation should be to the left (toward lower numbers) or to the right (toward higher numbers). Then, the rotation has a distance value which indicates how many clicks the dial should be rotated in that direction.
+The attached document (your puzzle day_1.txt) contains a sequence of rotations, one per line, which tell you how to open the safe. A rotation starts with an L or R which indicates whether the rotation should be to the left (toward lower numbers) or to the right (toward higher numbers). Then, the rotation has a distance value which indicates how many clicks the dial should be rotated in that direction.
 
 So, if the dial were pointing at 11, a rotation of R8 would cause the dial to point at 19. After that, a rotation of L19 would cause it to point at 0.
 
@@ -119,7 +119,7 @@ def test2():
 
 
 def first_stage():
-    with open('day_1_input.txt') as f:
+    with open('day_1.txt') as f:
         moves = f.read().splitlines()
         cur_number = 50
         counter = 0
@@ -131,7 +131,7 @@ def first_stage():
 
 
 def second_stage():
-    with open('day_1_input.txt') as f:
+    with open('day_1.txt') as f:
         moves = f.read().splitlines()
         cur_number = 50
         counter = 0

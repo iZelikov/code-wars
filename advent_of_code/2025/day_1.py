@@ -112,9 +112,9 @@ def get_number2(move: str, current_number: int = 50, total_numbers=100) -> tuple
 
 def test2():
     cur_number = 50
-    for i in ['L68', 'L30', 'R48', 'L5', 'R60', 'L55', 'L1', 'L99', 'R14', 'L82']:
+    for move in ['L68', 'L30', 'R48', 'L5', 'R60', 'L55', 'L1', 'L99', 'R14', 'L82']:
         # cur_number = get_number(i, cur_number)
-        cur_number, clicks = get_number2(i, cur_number)
+        cur_number, clicks = get_number2(move, cur_number)
         print(cur_number, clicks)
 
 
@@ -123,8 +123,8 @@ def first_stage():
         moves = f.read().splitlines()
         cur_number = 50
         counter = 0
-        for i in moves:
-            cur_number = get_number1(i, cur_number)
+        for move in moves:
+            cur_number = get_number1(move, cur_number)
             if cur_number == 0:
                 counter += 1
         print(counter)  # 1147 - first stage
@@ -135,9 +135,10 @@ def second_stage():
         moves = f.read().splitlines()
         cur_number = 50
         counter = 0
-        for i in moves:
-            cur_number, clicks = get_number2(i, cur_number)
+        for move in moves:
+            cur_number, clicks = get_number2(move, cur_number)
             counter += clicks
         print(counter)  # 6789 - second stage
 
+first_stage()
 second_stage()

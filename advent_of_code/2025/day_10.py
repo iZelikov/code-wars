@@ -221,15 +221,21 @@ def fist_part():
 def find_optimal(machine: Machine, buttons: list):
     if sum(buttons) >= optimal_presses[0]:
         return
-    machine.reset()
-    for i, count in enumerate(buttons):
-        for _ in range(count):
-            machine.press_joltage(i)
+    joltage = []
+    if str(buttons) in find_optimal.memo:
+       joltage = find_optimal.memo[str(buttons)]
+    else:
+        machine.reset()
+        for i, count in enumerate(buttons):
+            for _ in range(count):
+                machine.press_joltage(i)
+        joltage = machine.joltage.copy()
+        find_optimal.memo[str(buttons)] = joltage
 
-    if machine.joltage == machine.joltage_requirements:
+    if joltage == machine.joltage_requirements:
         optimal_presses[0] = sum(buttons)
         optimal_presses[1] = buttons.copy()
-        # print(optimal_presses)
+        print(optimal_presses)
     elif sum(buttons) < optimal_presses[0]:
         for i, joltage in enumerate(machine.joltage):
             if joltage > machine.joltage_requirements[i]:
@@ -261,11 +267,224 @@ def part_2():
         machines = [Machine(line) for line in lines]
         total = 0
         for i, machine in enumerate(machines):
+            find_optimal.memo = {}
             find_optimal(machine, [0]*len(machine.buttons))
             print(i, optimal_presses)
             total+=optimal_presses[0]
             optimal_presses = [float('inf'), []]
         print(total)
+
+"""
+Решения, предложенные DeepSeek:
+"""
+def part_2_ai():
+    with open(filename) as f:
+        lines = f.read().splitlines()
+        machines = [Machine(line) for line in lines]
+        total = 0
+        for i, machine in enumerate(machines):
+            result = min_clicks_ilp(machine.buttons, machine.joltage_requirements)
+            # result = min_clicks_dp(machine.buttons, machine.joltage_requirements)
+            # result = min_clicks_bfs(machine.buttons, machine.joltage_requirements)
+            # result = min_clicks_bidirectional(machine.buttons, machine.joltage_requirements)
+            print(i, result)
+            total+=result
+        print(total)
+
+
+from functools import lru_cache
+import math
+
+"""
+Метод динамического программирования (DP)
+Очень медленный алгоритм
+"""
+def min_clicks_dp(buttons, targets):
+    n = len(targets)  # количество индикаторов
+    m = len(buttons)  # количество кнопок
+
+    # Преобразуем кнопки в битовые маски для скорости
+    button_masks = []
+    for btn in buttons:
+        mask = 0
+        for idx in btn:
+            mask |= (1 << idx)
+        button_masks.append(mask)
+
+    # Для оценки минимального остатка: эвристика
+    @lru_cache(maxsize=None)
+    def dp(state_tuple):
+        # Базовый случай: все цели достигнуты
+        if all(state_tuple[i] >= targets[i] for i in range(n)):
+            return 0
+
+        # Если какой-то индикатор превысил цель - недопустимое состояние
+        if any(state_tuple[i] > targets[i] for i in range(n)):
+            return math.inf
+
+        # Преобразуем в список для изменений
+        state = list(state_tuple)
+
+        # Нижняя оценка (эвристика)
+        best = math.inf
+
+        # Перебираем все кнопки
+        for btn_idx, btn in enumerate(buttons):
+            # Проверяем, есть ли смысл нажимать эту кнопку
+            useful = False
+            for i in btn:
+                if state[i] < targets[i]:
+                    useful = True
+                    break
+
+            if not useful:
+                continue
+
+            # Создаем новое состояние
+            new_state = state.copy()
+            for i in btn:
+                new_state[i] = min(new_state[i] + 1, targets[i])
+
+            # Рекурсивный вызов
+            res = dp(tuple(new_state))
+            if res < math.inf:
+                best = min(best, 1 + res)
+
+        return best
+
+    return dp(tuple([0] * n))
+
+
+from collections import deque
+
+"""
+2. Метод BFS с мемоизацией состояния
+Почти такой же медленный как DP
+"""
+def min_clicks_bfs(buttons, targets):
+    n = len(targets)
+
+    # Начальное состояние
+    start = tuple([0] * n)
+    target_state = tuple(targets)
+
+    if start == target_state:
+        return 0
+
+    # Очередь для BFS: (состояние, количество нажатий)
+    queue = deque([(start, 0)])
+    visited = {start}
+
+    while queue:
+        state, clicks = queue.popleft()
+
+        # Перебираем все кнопки
+        for btn in buttons:
+            # Создаем новое состояние
+            new_state = list(state)
+            for i in btn:
+                if new_state[i] < targets[i]:
+                    new_state[i] += 1
+
+            new_state_tuple = tuple(new_state)
+
+            # Проверяем, не были ли уже в этом состоянии
+            if new_state_tuple in visited:
+                continue
+
+            # Проверяем, достигли ли цели
+            if new_state_tuple == target_state:
+                return clicks + 1
+
+            # Добавляем в очередь
+            visited.add(new_state_tuple)
+            queue.append((new_state_tuple, clicks + 1))
+
+    return -1  # Если решение не найдено (в данной задаче всегда найдется)
+
+"""
+3. Улучшенный метод DP с ограничением по глубине
+То же самое вид с боку
+"""
+def min_clicks_bidirectional(buttons, targets):
+    n = len(targets)
+
+    # Идем от цели к нулю (инвертируем задачу)
+    # Находим максимальное значение среди targets
+    max_val = max(targets)
+
+    # Кэш для DP сверху вниз
+    memo = {}
+
+    def dfs(current):
+        # Если все нули - достигли начала
+        if all(x == 0 for x in current):
+            return 0
+
+        current_tuple = tuple(current)
+        if current_tuple in memo:
+            return memo[current_tuple]
+
+        best = float('inf')
+
+        # Перебираем кнопки в обратном направлении
+        for btn in buttons:
+            # Проверяем, можно ли "отменить" это нажатие
+            can_undo = True
+            new_state = list(current)
+
+            for i in btn:
+                if new_state[i] == 0:
+                    can_undo = False
+                    break
+                new_state[i] -= 1
+
+            if can_undo:
+                res = dfs(tuple(new_state))
+                if res < best:
+                    best = 1 + res
+
+        memo[current_tuple] = best
+        return best
+
+    return dfs(tuple(targets))
+
+
+import pulp
+
+"""
+4. Оптимальный подход: Integer Linear Programming
+Магия неподвластная смертным умам:(
+"""
+def min_clicks_ilp(buttons, targets):
+    n = len(targets)
+    m = len(buttons)
+
+    # Создаем модель
+    prob = pulp.LpProblem("MinClicks", pulp.LpMinimize)
+
+    # Переменные: сколько раз нажимаем каждую кнопку
+    x = [pulp.LpVariable(f"x{i}", lowBound=0, cat='Integer') for i in range(m)]
+
+    # Целевая функция: минимизировать сумму нажатий
+    prob += pulp.lpSum(x)
+
+    # Ограничения для каждого индикатора
+    for i in range(n):
+        # Сумма вкладов от всех кнопок должна равняться targets[i]
+        coeffs = []
+        for j in range(m):
+            if i in buttons[j]:
+                coeffs.append(1)
+            else:
+                coeffs.append(0)
+
+        prob += pulp.lpSum([coeffs[j] * x[j] for j in range(m)]) == targets[i]
+
+    # Решаем
+    prob.solve(pulp.PULP_CBC_CMD(msg=False))
+
+    return int(pulp.value(prob.objective))
 
 
 filename = "day_10.txt"
@@ -275,4 +494,5 @@ filename = "day_10.txt"
 # second_part()
 
 optimal_presses = [float('inf'), []]
-part_2()
+# part_2()
+part_2_ai()

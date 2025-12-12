@@ -29,5 +29,18 @@
 m, n = map(int, input().split())
 requirements = list(map(int, input().split()))
 shortage = sum(requirements) - m
-s = shortage // n
-l = shortage % n
+groups = list(map(list, zip(requirements, requirements)))
+while shortage:
+    groups.sort(key=lambda x: (x[0] == 0, x[1] - x[0]))
+    s = shortage // n
+    l = shortage % n
+    for i in range(l):
+        take = min(groups[i][0], s + 1)
+        groups[i][0] -= take
+        shortage -= take
+    for i in range(l, n):
+        take = min(groups[i][0], s)
+        groups[i][0] -= take
+        shortage -= take
+
+print(sum((x[1] - x[0]) ** 2 for x in groups) % (10 ** 9 + 7))

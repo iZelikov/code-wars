@@ -4,10 +4,14 @@
 
 class Solution:
     def convert(self, s: str, numRows: int) -> str:
+        if numRows == 1:
+            return s
         result = [[] for _ in range(numRows)]
-        n = 0
-        for c in enumerate(s):
-            if n < numRows:
-                result[n].append(c)
-                n+=1
+        period = 2 * numRows - 2
+        for i, c in enumerate(s):
+            j = min(i % period, period - i % period)
+            result[j].append(c)
+        rs = ''.join(''.join(x) for x in result)
+        return rs
 
+print(Solution().convert("a",1))

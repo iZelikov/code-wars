@@ -1,8 +1,6 @@
 """
 7. Reverse Integer
 """
-from unittest import result
-
 
 class Solution:
     def reverse(self, x: int) -> int:
